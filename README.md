@@ -1,6 +1,6 @@
 ---
 publishDate: 2026-05-14T00:00:00Z
-title: TU Ankaja - Hardware Random Number Generator using MYOSA Kit
+title: TU Ankaja: Electronic Noise Powered and MYOSA-integrated Sensor Based Random Number Generator.
 excerpt: A multi-sensor hardware entropy collector built on an ESP32 based MYOSA Motherboard and MYOSA sensor and an external circuit, feeding a cryptographic engine over MQTT with randomly generated numbers.
 image: assets/box-exterior-front.png
 tags:
@@ -9,9 +9,8 @@ tags:
   - MOSFET
   - MQTT
   - MYOSA-kit
-  - Randomness
+  - TRNgs
 ---
-# TU Ankaja - A Hardware based Random Number Generator using MYOSA kit
 
 ![IoT](https://img.shields.io/badge/IoT-blue) ![Rust](https://img.shields.io/badge/Factory--Safety-orange) ![MOSFET](https://img.shields.io/badge/MOSFET-green) ![MQTT](https://img.shields.io/badge/MQTT-purple) ![MYOSA-kit](https://img.shields.io/badge/MYOSA-kit-red) ![Randomness](https://img.shields.io/badge/Randomness-61DAFB)
 
@@ -43,113 +42,9 @@ Built by **Team TU Ankaja** for the IEEE MYOSA Innovation Challenge, organized b
 - Provides a **low analog computational cost** solution for capturing random electronic fluctuations.
 - Serves as a customized hardware source for true randomness, perfectly **tailored for low-to-moderate priority security applications.**
 
-**Key Features:**
-* **Analog Noise Generation:** Utilizes an IRF540N n-channel MOSFET as a switch to generate high-frequency noise signals.
-* **Multi-Sensor Aggregation:** Captures physical parameters like Electronic noise using MOSFET, RGB light, ambient light, temperature, gyroscope data (in x, y, z), air particles, simultaneously.
-* **Custom Chaotic Environment:** Employs a physical mirrored box with rotating LEDs, moving discs, and agitated air particles to create a highly dynamic sensory input.
-* **Digit-Picking Algorithm:** Uses an array-based system to process sensor data into true random numbers.
-* **Validation of the RNG using NIST Suite:** The random numbers generated using the prototype were tested using the NIST Suite, and the system was found to pass __/15 tests, which is considered to be excellent.
+**Hardware Pinout:**
 
----
-
-## Demo / Examples
-
-### Images
-
-<p align="center">
-  <img src="assets/box-exterior-front.png" width="800"><br/>
-  <i>TU Ankaja — the chaotic box exterior. Label reads "TU Ankaja, Tezpur University — IEEE MYOSA 5.0"</i>
-</p>
-
-<p align="center">
-  <img src="assets/box-exterior-side.png" width="800"><br/>
-  <i>Side view with door open — mirrored interior walls visible, sensors and wiring inside</i>
-</p>
-
-<p align="center">
-  <img src="assets/box-dimensions.jpg" width="800"><br/>
-  <i>Hand-drawn design sketch — box dimensions: 18x18x25 cm, base: 20x20x2.5 cm</i>
-</p>
-
-<p align="center">
-  <img src="assets/mosfet-circuit-closeup.jpeg" width="800"><br/>
-  <i>Close-up of the MOSFET noise circuit on perfboard (2k ohm pull-up + 82 ohm gate resistor) mounted on the MYOSA motherboard with 0.96" OLED display</i>
-</p>
-
-<p align="center">
-  <img src="assets/chaotic-box-inside-full.jpeg" width="800"><br/>
-  <i>Inside the chaotic box — mirror foil, motor shaft with spinning disc, PMS5003 particle sensor (blue, top-left), MYOSA modules (red PCBs)</i>
-</p>
-
-<p align="center">
-  <img src="assets/chaotic-box-fan.jpeg" width="800"><br/>
-  <i>Fan blade for particle agitation — blows air across the PMS5003 sensor to generate unpredictable particle readings</i>
-</p>
-
-<p align="center">
-  <img src="assets/chaotic-box-sensors.jpeg" width="800"><br/>
-  <i>MYOSA Light/Proximity module (APDS9960, red PCB on wall), motor shaft with LED disc, and sensor wiring harness</i>
-</p>
-
-<p align="center">
-  <img src="assets/chaotic-box-bottom.jpeg" width="800"><br/>
-  <i>Bottom of chaotic box — MYOSA accelerometer/gyroscope module, BMP180 temperature sensor (blue PCB), and MOSFET perfboard with resistors</i>
-</p>
-
-<p align="center">
-  <img src="assets/chaotic-box-motor.jpeg" width="800"><br/>
-  <i>Motor assembly with rotating disc and colored LEDs for visual disturbance of the APDS9960 sensor</i>
-</p>
-
-<p align="center">
-  <img src="assets/dashboard-raw-data.png" width="800"><br/>
-  <i>Raw Data Viewer — live MQTT sensor graphs for MOSFET noise, color, ambient light, temperature, accelerometer, and gyroscope across 21 channels</i>
-</p>
-
-<p align="center">
-  <img src="assets/dashboard-otp.png" width="800"><br/>
-  <i>OTP Generator — hardware-backed one-time passwords generated from MOSFET noise + SHA-256, with generation history</i>
-</p>
-
-### Videos
-
-<video controls width="100%">
-  <source src="myosa-demo.mp4" type="video/mp4">
-</video>
-
----
-
-## Features (Detailed)
-
-### **1. Analog Noise Generator Circuit**
-
-Electronic noise in MOSFETs is naturally stochastic. Circuit Design: The Drain (D) terminal is connected to +3.3V using a 2k ohm pull-up resistor. Input: A random value from 0 to 255 using `dacWrite(25, esp_random() & 0xFF)` function is applied at the Gate (G) from the DAC pin 25 of MYOSA Motherboard through a small gate resistor 82 ohm. Output: The resulting random signal is harvested from the Drain terminal and fed directly to the 12-bit ADC pin 32 of the MYOSA motherboard.
-
-```
-    +3.3V
-      |
-     [2k ohm]  <- Pull-up resistor
-      |
-      +-------- ADC Pin 32 (MYOSA) <- Output: random noise signal
-      |
-    Drain
-      |
-   [IRF540N]  <- N-channel MOSFET
-      |
-    Gate
-      |
-     [82 ohm] <- Gate resistor
-      |
-    DAC Pin 25 (MYOSA) <- Input: dacWrite(25, esp_random() & 0xFF)
-      |
-    Source
-      |
-     GND
-```
-
-**ESP32 Project Pinout:**
-
-| Component / Function | ESP32 Pin |
+| Component / Function | MYOSA Mother Board Pin |
 |---|---|
 | DAC output / MOSFET Gate input | GPIO 25 |
 | ADC input / MOSFET Drain output | GPIO 32 |
@@ -163,6 +58,30 @@ Electronic noise in MOSFETs is naturally stochastic. Circuit Design: The Drain (
 | UART Rx (PMS5003) | GPIO 17 |
 | I2C SDA | GPIO 21 |
 | I2C SCL | GPIO 22 |
+
+
+**Key Features:**
+* **Analog Noise Generation:** Utilizes an IRF540N n-channel MOSFET as a switch to generate high-frequency noise signals.
+* **Multi-Sensor Aggregation:** Captures physical parameters like Electronic noise using MOSFET, RGB light, ambient light, temperature, gyroscope data (in x, y, z), air particles, simultaneously.
+* **Custom Chaotic Environment:** Employs a physical mirrored box with rotating LEDs, moving discs, and agitated air particles to create a highly dynamic sensory input.
+* **Digit-Picking Algorithm:** Uses an array-based system to process sensor data into true random numbers.
+* **Validation of the RNG using NIST Suite:** The random numbers generated using the prototype were tested using the NIST Suite, and the system was found to pass __/15 tests, which is considered to be excellent.
+
+---
+
+## Demo / Examples
+
+### Images
+
+### Videos
+
+---
+
+## Features (Detailed)
+
+### **1. Analog Noise Generator Circuit**
+
+Electronic noise in MOSFETs is naturally stochastic. Circuit Design: The Drain (D) terminal is connected to +3.3V using a 2k ohm pull-up resistor. Input: A random value from 0 to 255 using `dacWrite(25, esp_random() & 0xFF)` function is applied at the Gate (G) from the DAC pin 25 of MYOSA Motherboard through a small gate resistor 82 ohm. Output: The resulting random signal is harvested from the Drain terminal and fed directly to the 12-bit ADC pin 32 of the MYOSA motherboard.
 
 ### **2. Chaotic Hardware Environment**
 
@@ -179,106 +98,74 @@ To gather unpredictable digital data, a 45 cm x 45 cm box with a rough mirrored 
 - **Random Bit Selection:** A software "BitPicker" randomly selects bits from across the sensor arrays.
 - **BCD Clamping:** The 16 random bits are grouped, and a modulo operator (%10) limits the decimal equivalent of the chunks to 9 (preventing hex values up to 15), finalizing the 16-bit random output.
 
-### **4. Wireless Data Pipeline (MQTT)**
+### **$. NIST Complient**
 
-We use Eclipse Mosquitto as the MQTT broker. The ESP32 samples all 21 sensors, packs readings into CSV, and publishes over WiFi:
-
-```plaintext
-ESP32 (MYOSA sensors)
-    | WiFi
-    v
-Mosquitto Broker (laptop, port 1883)
-    | 2 topics: random/numbers, random/params
-    v
-Rust Backend (subscriber)
-    | HTTP API (port 3001)
-    v
-Next.js Dashboard (port 3000)
-```
-
-MQTT gives us reliable, low-latency message delivery. The broker requires username/password authentication, so unauthorized devices cannot connect. QoS level 1 ensures no entropy samples are silently dropped.
-
-### **5. OTP Generation**
-
-One-time passwords are generated by combining a hardware random number with a microsecond timestamp:
+- **NIST SP-800 22**
+- **NIST SP-800 90b**
 
 ```plaintext
-OTP = SHA-256(random_number_bytes || timestamp_bytes) mod 1,000,000
+./ea_non_iid -i -v clean.bin 8
+Opening file: 'clean.bin' (SHA-256 hash 6f6f763f3cf419aebe4138ecd45f902c032e9d886d5b7f92fe613d569d741e88)
+Loaded 500000 samples of 256 distinct 8-bit-wide symbols
+Number of Binary Symbols: 4000000
+
+*** Warning: data contains less than 1000000 samples ***
+
+
+Running non-IID tests...
+
+Running Most Common Value Estimate...
+Bitstring MCV Estimate: mode = 2000846, p-hat = 0.50021150000000003, p_u = 0.50085545734877057
+        Most Common Value Estimate (bit string) = 0.997534 / 1 bit(s)
+Literal MCV Estimate: mode = 2103, p-hat = 0.0042059999999999997, p_u = 0.0044417501069705847
+        Most Common Value Estimate = 7.814656 / 8 bit(s)
+
+Running Entropic Statistic Estimates (bit strings only)...
+Bitstring Collision Estimate: X-bar = 2.5001853262836424, sigma-hat = 0.50000012191585219, p = 0.52040707920565799
+        Collision Test Estimate (bit string) = 0.942288 / 1 bit(s)
+Bitstring Markov Estimate: P_0 = 0.50021150000000003, P_1 = 0.49978849999999997, P_0,0 = 0.5004090771648978, P_0,1 = 0.4995909228351022, P_1,0 = 0.50001400592450607, P_1,1 = 0.49998599407549393, p_max = 3.2617554867162069e-39
+        Markov Test Estimate (bit string) = 0.998825 / 1 bit(s)
+Bitstring Compression Estimate: X-bar = 5.2177154580149221, sigma-hat = 1.0146812433751566, p = 0.024829087768112323
+        Compression Test Estimate (bit string) = 0.888637 / 1 bit(s)
+
+Running Tuple Estimates...
+Bitstring t-Tuple Estimate: t = 18, p-hat_max = 0.5252200659857931316476, p_u = 0.5258632036900274298085
+Bitstring LRS Estimate: u = 19, v = 41, p-hat = 0.49998108984273857, p_u = 0.50062504724865993
+        T-Tuple Test Estimate (bit string) = 0.927241 / 1 bit(s)
+Literal t-Tuple Estimate: t = 1, p-hat_max = 0.004205999999999999999829, p_u = 0.004441750106970585173453
+Literal LRS Estimate: u = 2, v = 4, p-hat = 0.003907713861229295, p_u = 0.0041349846806774507
+        T-Tuple Test Estimate = 7.814656 / 8 bit(s)
+        LRS Test Estimate (bit string) = 0.998198 / 1 bit(s)
+        LRS Test Estimate = 7.917902 / 8 bit(s)
+
+Running Predictor Estimates...
+Bitstring MultiMCW Prediction Estimate: N = 3999937, Pglobal' = 0.50086034082526742 (C = 2000834) Plocal can't affect result (r = 19)
+        Multi Most Common in Window (MultiMCW) Prediction Test Estimate (bit string) = 0.997520 / 1 bit(s)                                                   Literal MultiMCW Prediction Estimate: N = 499937, Pglobal' = 0.0041831345534559658 (C = 1977) Plocal can't affect result (r = 3)
+        Multi Most Common in Window (MultiMCW) Prediction Test Estimate = 7.901200 / 8 bit(s)
+Bitstring Lag Prediction Estimate: N = 3999999, Pglobal' = 0.50108358234786721 (C = 2001758) Plocal can't affect result (r = 20)
+        Lag Prediction Test Estimate (bit string) = 0.996877 / 1 bit(s)
+Literal Lag Prediction Estimate: N = 499999, Pglobal' = 0.0041229395067461441 (C = 1948) Plocal can't affect result (r = 3)
+        Lag Prediction Test Estimate = 7.922111 / 8 bit(s)
+Bitstring MultiMMC Prediction Estimate: N = 3999998, Pglobal' = 0.5007807076116616 (C = 2000546) Plocal can't affect result (r = 19)
+        Multi Markov Model with Counting (MultiMMC) Prediction Test Estimate (bit string) = 0.997749 / 1 bit(s)
+Literal MultiMMC Prediction Estimate: N = 499998, Pglobal' = 0.004155874273437418 (C = 1964) Plocal can't affect result (r = 3)                                      Multi Markov Model with Counting (MultiMMC) Prediction Test Estimate = 7.910632 / 8 bit(s)                                                           Bitstring LZ78Y Prediction Estimate: N = 3999983, Pglobal' = 0.50072708411917954 (C = 2000324) Plocal can't affect result (r = 24)                                   LZ78Y Prediction Test Estimate (bit string) = 0.997904 / 1 bit(s)
+                                  Literal LZ78Y Prediction Estimate: N = 499983, Pglobal' = 0.0041539410832216817 (C = 1963) Plocal can't affect result (r = 3)                                        LZ78Y Prediction Test Estimate = 7.911304 / 8 bit(s)
+
+H_original: 7.814656
+H_bitstring: 0.888637
+min(H_original, 8 X H_bitstring): 7.109100
 ```
-
-This produces a 6-digit code. The random number comes from MOSFET noise (not pseudo-random), and the timestamp adds uniqueness even if the same number appears twice.
-
-### **6. Real-Time Dashboard (Next.js)**
-
-Three pages, each serving a different purpose:
-
-- **OTP Generator** - Generate hardware-backed OTPs with one click. Shows source number, timestamp, and history.
-- **Raw Data Viewer** - Live sensor graphs for all 8 sensor groups, updating every 3 seconds.
-- **Cryptographic Dashboard** - Pool entropy bits, source quality tiers, health status, security event feed. Generate AES-256 keys, passwords, and session tokens on demand.
-
-### **7. Entropy Source Quality Tiers**
-
-The engine classifies each sensor source into quality tiers based on entropy contribution and health test pass rate:
-
-| Tier | Entropy Bits | Health Pass Rate | Sources |
-|------|-------------|------------------|---------|
-| **Excellent** | >= 7.5 bits/byte | > 99% | MOSFET noise (primary) |
-| **Good** | 5.0 - 7.5 bits/byte | > 95% | Accelerometer, Gyroscope, Particle sensor |
-| **Fair** | 2.0 - 5.0 bits/byte | > 90% | RGB color, Ambient light, Temperature |
-| **Poor** | < 2.0 bits/byte | < 90% | Rejected — not mixed into pool |
-
-Sources classified as **Poor** are flagged in the security event feed and excluded from the entropy pool. The dashboard displays real-time tier assignments for all active sources.
-
-### **8. MYOSA Libraries & Modules Used**
-
-| MYOSA Module | Library / Interface | Purpose |
-|---|---|---|
-| MYOSA Motherboard (ESP32) | `WiFi.h`, `PubSubClient.h`, DAC (`dacWrite`), ADC (`analogRead`) | WiFi connectivity, MQTT publishing, MOSFET gate drive, noise sampling |
-| MYOSA Accelerometer/Gyroscope | `Wire.h` (I2C, address `0x68`) | 6-axis motion data (accel x/y/z, gyro x/y/z) for entropy mixing |
-| MYOSA Light/Proximity (APDS9960) | `SparkFun_APDS9960.h` (I2C) | RGB color values and ambient light intensity |
-| MYOSA OLED Display | `Adafruit_SSD1306.h` (I2C) | On-device status display |
-| PMS5003 Particle Sensor | UART (`Serial2`) | PM1.0, PM2.5, PM10 particle concentration readings |
-| BMP180 | `Adafruit_BMP085.h` (I2C) | Temperature and barometric pressure |
-
-> **Note:** The PMS5003 and BMP180 are external sensors not included in the standard MYOSA kit. They were added to increase the number of independent entropy sources from 4 to 8 sensor groups (21 total channels).
-
-### **9. Hardware Deviations from Original MYOSA Kit**
-
-| Change | Reason |
-|--------|--------|
-| Added external IRF540N MOSFET circuit on breadboard | MYOSA kit does not include a dedicated analog noise source. The MOSFET's stochastic drain noise provides the primary entropy source with ~7.8 bits/byte. |
-| Added PMS5003 particle sensor via UART | Increases entropy diversity. Air particle counts are physically unpredictable and add an independent randomness channel. |
-| Added BMP180 temperature/pressure sensor | Provides environmental entropy. Temperature fluctuations inside the chaotic box contribute additional unpredictability. |
-| Built 45x45 cm chaotic box with mirror foil | Creates a controlled but unpredictable environment — motor-driven LEDs, fan-blown particles — to maximize sensor variance. |
-| Used DAC pin 25 -> Gate resistor (82 ohm) -> MOSFET Gate | The MYOSA DAC output drives the MOSFET gate with a random voltage (0-255), creating variable drain current and noise. |
-
-### **10. System Block Diagram**
 
 ```plaintext
-CHAOTIC BOX (45x45 cm)
-  [IRF540N MOSFET Noise] --ADC--> ESP32
-  [APDS9960 RGB+Light]   --I2C--> ESP32
-  [PMS5003 Particle]     --UART-> ESP32
-  [MPU6050 + BMP180]     --I2C--> ESP32
-                                    |
-                              WiFi (MQTT, 500ms)
-                                    v
-                          Mosquitto Broker (port 1883)
-                            3 topics: random/numbers, random/params
-                                    |
-                                    v
-                          Rust Backend
-                            -> SHA-256 Whitening
-                            -> Entropy Pool (256-bit) + SP 800-90B Health
-                            -> ChaCha20 DRBG (Forward Secrecy)
-                            -> Security Gate (OTP / AES Key Gen)
-                                    |
-                              HTTP API (port 3001)
-                                    v
-                          Next.js Dashboard (port 3000)
-                            [OTP Gen] [Raw Data] [Entropy Engine]
-```
-
+./ea_conditioning -v 368 256 256 327.0186
+n_in = 368
+n_out = 256
+nw = 256
+h_in = 327.0185999999999999776
+Attempting to compute entropy with 736 bits of precision.
+Output_Entropy(*) = 255.9999999999999996252
+(Vetted) h_out = 255.9999999999999996252
+epsilon = 2^(-59.23561681352755137891): FIPS 140-3 IG D.K Resolution 19 Full Entropy if the conditioning component security strength is >= 256```
 ---
 
 ## Usage Instructions
