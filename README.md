@@ -1,7 +1,7 @@
 ---
 publishDate: 2026-05-14T00:00:00Z
 title: TU Ankaja - Hardware Random Number Generator with Blockchain Device Authentication
-excerpt: A multi-sensor hardware entropy collector built on ESP32 and MYOSA, feeding a cryptographic engine over MQTT with blockchain-based device authentication and a real-time dashboard.
+excerpt: A multi-sensor hardware entropy collector built on an ESP32 based MYOSA Motherboard and MYOSA sensor and an external circuit, feeding a cryptographic engine over MQTT with randomly generated numbers.
 image: assets/box-exterior-front.png
 tags:
   - entropy
@@ -13,6 +13,8 @@ tags:
   - cryptography
   - iot-security
 ---
+
+[IoT](https://img.shields.io/badge/IoT-blue) ![Rust](https://img.shields.io/badge/Factory--Safety-orange) ![MOSFET](https://img.shields.io/badge/MOSFET-green) ![MQTT](https://img.shields.io/badge/MQTT-purple) ![MYOSA-kit](https://img.shields.io/badge/MYOSA-kit-red) ![Randomness](https://img.shields.io/badge/Randomness-61DAFB)
 
 > Turn raw sensor noise into cryptographically secure random numbers, verified by blockchain and visualized in real time.
 
@@ -28,7 +30,7 @@ Built by **Team TU Ankaja** for the IEEE MYOSA Innovation Challenge, organized b
 |------|-----------|------|
 | Yash Sharma | B.Tech 4th Semester, ECE | Lead Developer — Rust backend, MQTT pipeline, blockchain integration, frontend dashboard |
 | Nautesh Kanojiya | B.Tech 4th Semester, ECE | Hardware Design — MOSFET noise circuit, chaotic box construction, sensor wiring |
-| Nabjyoti | B.Tech 4th Semester, ECE | Firmware — ESP32 MQTT publisher, sensor data collection, BCD clamping logic |
+| Nabajyoti Das | B.Tech 4th Semester, ECE | Firmware — ESP32 MQTT publisher, sensor data collection, BCD clamping logic |
 | Hritima Rabha | B.Tech 4th Semester, ECE | Testing & Documentation — Integration tests, README, demo scripts |
 
 ---
@@ -42,14 +44,11 @@ Built by **Team TU Ankaja** for the IEEE MYOSA Innovation Challenge, organized b
 - Provides a **low analog computational cost** solution for capturing random electronic fluctuations.
 - Serves as a customized hardware source for true randomness, perfectly **tailored for low-to-moderate priority security applications.**
 
-**Key features:**
+**Key Features:**
 * **Analog Noise Generation:** Utilizes an IRF540N n-channel MOSFET as a switch to generate high-frequency noise signals.
-* **Multi-Sensor Aggregation:** Captures physical parameters like electronic noise using MOSFET, RGB light, ambient light, temperature, gyroscope data (in x, y, z), air particles simultaneously.
-* **Wireless Data Pipeline:** Streams all 21 sensor channels over MQTT to a Rust-based cryptographic engine at 500ms intervals.
-* **Blockchain Device Authentication:** Validates the ESP32 MAC address against a MultiChain blockchain before accepting any data.
-* **Cryptographic Engine:** SHA-256 whitening, ChaCha20 DRBG with forward secrecy, SP 800-90B health monitoring.
-* **OTP Generation:** Generates hardware-backed 6-digit one-time passwords from MOSFET noise + SHA-256.
-* **Real-Time Dashboard:** Live sensor graphs, entropy pool stats, and cryptographic material generation on a Next.js frontend.
+* **Multi-Sensor Aggregation:** Captures physical parameters like Electronic noise using MOSFET, RGB light, ambient light, temperature, gyroscope data (in x, y, z), air particles, simultaneously.
+* **Custom Chaotic Environment:** Employs a physical mirrored box with rotating LEDs, moving discs, and agitated air particles to create a highly dynamic sensory input.
+* **Bit-Picking Algorithm:** Uses an array-based system to process sensor data into true random numbers.
 
 ---
 
