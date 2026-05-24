@@ -4,14 +4,12 @@ title: TU Ankaja - Hardware Random Number Generator with Blockchain Device Authe
 excerpt: A multi-sensor hardware entropy collector built on an ESP32 based MYOSA Motherboard and MYOSA sensor and an external circuit, feeding a cryptographic engine over MQTT with randomly generated numbers.
 image: assets/box-exterior-front.png
 tags:
-  - entropy
-  - hardware-rng
-  - mqtt
-  - blockchain
-  - esp32
-  - myosa
-  - cryptography
-  - iot-security
+  - IoT
+  - Rust
+  - MOSFET
+  - MQTT
+  - MYOSA-kit
+  - Randomness
 ---
 
 [IoT](https://img.shields.io/badge/IoT-blue) ![Rust](https://img.shields.io/badge/Factory--Safety-orange) ![MOSFET](https://img.shields.io/badge/MOSFET-green) ![MQTT](https://img.shields.io/badge/MQTT-purple) ![MYOSA-kit](https://img.shields.io/badge/MYOSA-kit-red) ![Randomness](https://img.shields.io/badge/Randomness-61DAFB)
