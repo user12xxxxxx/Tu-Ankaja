@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+# Entropy Vault — Blockchain CLI helper
+# Usage:
+#   blockchain list              — list all registered MACs
+#   blockchain check <mac>       — check if a MAC is registered
+#   blockchain add <mac>         — register a new MAC
+#   blockchain demo              — run the video demo
+
+CONTAINER="entropy-multichain"
+CHAIN="entropy-chain"
+STREAM="valid-macs"
+
+case "$1" in
+  list)
+    docker exec "$CONTAINER" multichain-cli "$CHAIN" liststreamitems "$STREAM"
+    ;;
+  check)
+    if [ -z "$2" ]; then
+      echo "Usage: blockchain check <MAC>"
+      echo "Example: blockchain check 4C:C3:82:36:81:04"
+      exit 1
+    fi
+    docker exec "$CONTAINER" multichain-cli "$CHAIN" liststreamkeyitems "$STREAM" "$2"
+    ;;
+  add)
+    if [ -z "$2" ]; then
+      echo "Usage: blockchain add <MAC>"
+      echo "Example: blockchain add 4C:C3:82:36:81:04"
+      exit 1
+    fi
+    docker exec "$CONTAINER" multichain-cli "$CHAIN" publish "$STREAM" "$2" "{\"json\":{\"mac\":\"$2\",\"status\":\"valid\",\"added\":\"manual\"}}"
+    ;;
+  demo)
+    "$(dirname "$0")/demo-blockchain.sh"
+    ;;
+  *)
+    echo "Entropy Vault — Blockchain CLI"
+    echo ""
+    echo "  blockchain list            List all registered devices"
+    echo "  blockchain check <mac>     Check if a MAC is on-chain"
+    echo "  blockchain add <mac>       Register a new MAC"
+    echo "  blockchain demo            Run the video demo"
+    ;;
+esac

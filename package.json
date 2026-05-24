@@ -1,0 +1,10 @@
+{
+  "name": "entropy-vault",
+  "private": true,
+  "scripts": {
+    "check": "./scripts/check-all.sh",
+    "firmware": "make -C firmware run",
+    "engine": "cargo run --manifest-path entropy-engine/Cargo.toml",
+    "frontend": "npm --prefix frontend run dev"
+  }
+}

@@ -1,0 +1,27 @@
+# Build artifacts
+target/
+node_modules/
+.next/
+out/
+
+# Environment
+.venv/
+.env
+.env.local
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Compiled binaries
+firmware/build/
+
+# Logs & temp
+*.log
+*.swp
+*.swo
+*~
+
+# Python
+*.pyc
+__pycache__/
