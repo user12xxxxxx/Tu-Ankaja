@@ -1,7 +1,7 @@
 publishDate: 2026-05-14T00:00:00Z
 title: TU Ankaja: Electronic Noise Powered and MYOSA-integrated Sensor Based Random Number Generator.
 excerpt: A multi-sensor hardware entropy collector built on an ESP32 based MYOSA Motherboard and MYOSA sensor and an external circuit, feeding a cryptographic engine over MQTT with randomly generated numbers.
-image: /assets/images/Tu-Ankaja/chaotic-box-inside-full.jpg
+image: ./assets/chaotic-box-inside-full.jpg
 tags:
   - IoT
   - Rust
@@ -73,40 +73,40 @@ Built by **Team TU Ankaja** for the IEEE MYOSA Innovation Challenge, organized b
 ### Images
 
 <p align="center">
-  <img src="/assets/images/Tu-Ankaja/mosfet-circuit-closeup.jpg" width="800"><br/>
+  <img src="./assets/mosfet-circuit-closeup.jpeg" width="800"><br/>
   <i>Close-up of the MOSFET noise circuit on perfboard (2k ohm pull-up + 82 ohm gate resistor) mounted on the MYOSA motherboard with 0.96" OLED display</i>
 </p>
 
 <p align="center">
-  <img src="/assets/images/Tu-Ankaja/chaotic-box-inside-full.jpg" width="800"><br/>
+  <img src="./assets/chaotic-box-inside-full.jpg" width="800"><br/>
   <i>Inside the chaotic box — mirror foil walls, PMS5003 particle sensor (blue, top-left), APDS9960 light sensor, MYOSA Motherboard, motor axle with LED disc, motor driver (L298N), MPU6050, and fan for particle agitation</i>
 </p>
 
 <p align="center">
-  <img src="/assets/images/Tu-Ankaja/chaotic-box-sensors.jpg" width="800"><br/>
+  <img src="./assets/chaotic-box-sensors.jpg" width="800"><br/>
   <i>Close-up of internal wiring — PMS5003 particle sensor (top), MYOSA Motherboard (red PCB), MPU6050 accelerometer/gyroscope, and linear voltage regulator</i>
 </p>
 
 <p align="center">
-  <img src="/assets/images/Tu-Ankaja/chaotic-box-motor.jpg" width="800"><br/>
+  <img src="./assets/chaotic-box-motor.jpg" width="800"><br/>
   <i>Motor assembly with rotating disc and RGB LEDs for visual disturbance of the APDS9960 sensor, mirrored interior walls visible</i>
 </p>
 
 <p align="center">
-  <img src="/assets/images/Tu-Ankaja/dashboard-raw-data.png" width="800"><br/>
+  <img src="./assets/dashboard-raw-data.png" width="800"><br/>
   <i>Raw Data Viewer — live MQTT sensor graphs for MOSFET noise, color (RGB), ambient light, temperature, accelerometer, and gyroscope across 21 channels</i>
 </p>
 
 <p align="center">
-  <img src="/assets/images/Tu-Ankaja/dashboard-otp.png" width="800"><br/>
+  <img src="./assets/dashboard-otp.png" width="800"><br/>
   <i>OTP Generator — hardware-backed one-time passwords generated from MOSFET noise + SHA-256, with generation history</i>
 </p>
 
 ### Videos
 
-<video controls width="100%">
-  <source src="/myosa-demo.mp4" type="video/mp4">
-</video>
+https://github.com/YASHSHARMAOFFICIALLY/Tu-Ankaja/blob/main/assets/myosa-demo.mp4
+
+<video src="./assets/myosa-demo.mp4" controls width="100%"></video>
 
 ---
 
@@ -394,12 +394,14 @@ This runs the firmware simulator, Rust tests (96 tests), and frontend type check
 ```
 /tu-ankaja
   ├── assets/
-  │   ├── mosfet-circuit-closeup.jpg
+  │   ├── mosfet-circuit-closeup.jpeg
   │   ├── chaotic-box-inside-full.jpg
   │   ├── chaotic-box-sensors.jpg
   │   ├── chaotic-box-motor.jpg
   │   ├── dashboard-raw-data.png
-  │   └── dashboard-otp.png
+  │   ├── dashboard-otp.png
+  │   ├── Nist.png
+  │   └── myosa-demo.mp4
   │
   ├── firmware/
   │   ├── src/
@@ -456,7 +458,6 @@ This runs the firmware simulator, Rust tests (96 tests), and frontend type check
   │   ├── flash-esp32.sh
   │   └── start_all.sh
   │
-  ├── myosa-demo.mp4
   └── LICENSE
 ```
 
