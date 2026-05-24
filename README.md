@@ -4,7 +4,7 @@ publishDate: 2026-05-14
 
 ![IoT](https://img.shields.io/badge/IoT-blue) ![Rust](https://img.shields.io/badge/Factory--Safety-orange) ![MOSFET](https://img.shields.io/badge/MOSFET-green) ![MQTT](https://img.shields.io/badge/MQTT-purple) ![MYOSA-kit](https://img.shields.io/badge/MYOSA-kit-red) ![Randomness](https://img.shields.io/badge/Randomness-61DAFB)
 
-> Turn raw sensor noise into cryptographically secure random numbers, verified by blockchain and visualized in real time.
+> Turn raw sensor noise into cryptographically secure random numbers and  visualized in real time.
 
 ---
 
@@ -36,7 +36,7 @@ Built by **Team TU Ankaja** for the IEEE MYOSA Innovation Challenge, organized b
 * **Analog Noise Generation:** Utilizes an IRF540N n-channel MOSFET as a switch to generate high-frequency noise signals.
 * **Multi-Sensor Aggregation:** Captures physical parameters like Electronic noise using MOSFET, RGB light, ambient light, temperature, gyroscope data (in x, y, z), air particles, simultaneously.
 * **Custom Chaotic Environment:** Employs a physical mirrored box with rotating LEDs, moving discs, and agitated air particles to create a highly dynamic sensory input.
-* **Bit-Picking Algorithm:** Uses an array-based system to process sensor data into true random numbers.
+* **Digit-Picking Algorithm:** Uses an array-based system to process sensor data into true random numbers.
 
 ---
 
