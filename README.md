@@ -193,6 +193,12 @@ Built by **Team TU Ankaja** for the IEEE MYOSA Innovation Challenge, organized b
 
 ### **Video Demo**
 
+<p align="center">
+  <video src="myosa-demo.mp4" width="600" controls></video>
+</p>
+
+[▶ Watch Demo Video](myosa-demo.mp4)
+
 > Demo video showing the full pipeline: ESP32 publishing sensor data → MQTT broker → Rust engine → blockchain MAC validation → live dashboard
 
 ---
