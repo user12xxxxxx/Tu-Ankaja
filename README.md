@@ -14,15 +14,15 @@ tags:
   - iot-security
 ---
 
-# TU Ankaja - A Hardware based True Random Number Generator using MYOSA Kit
-
-![IoT](https://img.shields.io/badge/IoT-blue) ![Rust](https://img.shields.io/badge/Rust-orange) ![MOSFET](https://img.shields.io/badge/MOSFET-green) ![MQTT](https://img.shields.io/badge/MQTT-purple) ![MYOSA-kit](https://img.shields.io/badge/MYOSA--kit-red) ![Blockchain](https://img.shields.io/badge/Blockchain-yellow) ![Randomness](https://img.shields.io/badge/Randomness-61DAFB)
-
 > Turn raw sensor noise into cryptographically secure random numbers, verified by blockchain and visualized in real time.
 
 ---
 
-## Team Members
+## Acknowledgements
+
+Built by **Team TU Ankaja** for the IEEE MYOSA Innovation Challenge, organized by the **IEEE Sensors Council**. We would like to thank the MYOSA organizers and IEEE Sensors Council for providing the MYOSA development platform and the opportunity to explore true random number generation. We also acknowledge the guidance and support provided by our mentor **Dr. Rupam Goswami**, Professor, Department of ECE, Tezpur University, throughout this project.
+
+**Team Members:**
 
 | Name | Department | Role |
 |------|-----------|------|
@@ -30,10 +30,6 @@ tags:
 | Nautesh Kanojiya | B.Tech 4th Semester, ECE | Hardware Design — MOSFET noise circuit, chaotic box construction, sensor wiring |
 | Nabjyoti | B.Tech 4th Semester, ECE | Firmware — ESP32 MQTT publisher, sensor data collection, BCD clamping logic |
 | Hritima Rabha | B.Tech 4th Semester, ECE | Testing & Documentation — Integration tests, README, demo scripts |
-
-## Acknowledgements
-
-Built by **Team TU Ankaja** for the IEEE MYOSA Innovation Challenge, organized by the **IEEE Sensors Council**. We would like to thank the MYOSA organizers and IEEE Sensors Council for providing the MYOSA development platform and the opportunity to explore true random number generation. We also acknowledge the guidance and support provided by our mentor **Dr. Rupam Goswami**, Professor, Department of ECE, Tezpur University, throughout this project.
 
 ---
 
@@ -46,7 +42,7 @@ Built by **Team TU Ankaja** for the IEEE MYOSA Innovation Challenge, organized b
 - Provides a **low analog computational cost** solution for capturing random electronic fluctuations.
 - Serves as a customized hardware source for true randomness, perfectly **tailored for low-to-moderate priority security applications.**
 
-**Key Features:**
+**Key features:**
 * **Analog Noise Generation:** Utilizes an IRF540N n-channel MOSFET as a switch to generate high-frequency noise signals.
 * **Multi-Sensor Aggregation:** Captures physical parameters like electronic noise using MOSFET, RGB light, ambient light, temperature, gyroscope data (in x, y, z), air particles simultaneously.
 * **Wireless Data Pipeline:** Streams all 21 sensor channels over MQTT to a Rust-based cryptographic engine at 500ms intervals.
@@ -57,149 +53,60 @@ Built by **Team TU Ankaja** for the IEEE MYOSA Innovation Challenge, organized b
 
 ---
 
-## Cover Image
+## Demo / Examples
+
+### Images
 
 <p align="center">
-  <img src="assets/box-exterior-front.png" width="500"><br/>
+  <img src="assets/box-exterior-front.png" width="800"><br/>
   <i>TU Ankaja — the chaotic box exterior. Label reads "TU Ankaja, Tezpur University — IEEE MYOSA 5.0"</i>
 </p>
 
----
-
-## System Block Diagram
-
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                        CHAOTIC BOX (45×45 cm)                       │
-│                                                                     │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────────────┐   │
-│  │ IRF540N  │  │ APDS9960 │  │ PMS5003  │  │ MPU6050 (Accel/  │   │
-│  │ MOSFET   │  │ RGB+Light│  │ Particle │  │ Gyro) + BMP180   │   │
-│  │ Noise    │  │ Sensor   │  │ Sensor   │  │ Temp/Pressure    │   │
-│  └────┬─────┘  └────┬─────┘  └────┬─────┘  └───────┬──────────┘   │
-│       │ ADC          │ I2C         │ UART            │ I2C          │
-│       └──────────────┴─────────────┴────────────────┘              │
-│                              │                                      │
-│                    ┌─────────┴─────────┐                           │
-│                    │  ESP32 (MYOSA     │                           │
-│                    │  Motherboard)     │                           │
-│                    │  21 sensor channels│                          │
-│                    └─────────┬─────────┘                           │
-└──────────────────────────────┼──────────────────────────────────────┘
-                               │ WiFi (MQTT, 500ms)
-                               ▼
-                    ┌─────────────────────┐
-                    │  Mosquitto Broker   │
-                    │  Port 1883          │
-                    │  (Auth: user/pass)  │
-                    └──────┬──────────────┘
-                           │ 3 Topics:
-                           │  random/numbers
-                           │  random/params
-                           │  random/MAC
-                           ▼
-              ┌────────────────────────────┐
-              │  Rust Backend              │
-              │  ┌──────────────────────┐  │
-              │  │ Blockchain Validator │  │◄──── MultiChain (Docker)
-              │  │ (MAC check via RPC)  │  │      valid-macs stream
-              │  └──────────┬───────────┘  │
-              │             ▼              │
-              │  ┌──────────────────────┐  │
-              │  │ SHA-256 Whitening    │  │
-              │  └──────────┬───────────┘  │
-              │             ▼              │
-              │  ┌──────────────────────┐  │
-              │  │ Entropy Pool (256-bit)│ │
-              │  │ + SP 800-90B Health  │  │
-              │  └──────────┬───────────┘  │
-              │             ▼              │
-              │  ┌──────────────────────┐  │
-              │  │ ChaCha20 DRBG       │  │
-              │  │ (Forward Secrecy)   │  │
-              │  └──────────┬───────────┘  │
-              │             ▼              │
-              │  ┌──────────────────────┐  │
-              │  │ Security Gate       │  │
-              │  │ OTP / AES Key Gen   │  │
-              │  └──────────┬───────────┘  │
-              │             │ HTTP API     │
-              └─────────────┼──────────────┘
-                            │ Port 3001
-                            ▼
-              ┌────────────────────────────┐
-              │  Next.js Dashboard         │
-              │  Port 3000                 │
-              │  ┌────┐ ┌────┐ ┌────────┐ │
-              │  │OTP │ │Raw │ │Entropy │ │
-              │  │Gen │ │Data│ │Engine  │ │
-              │  └────┘ └────┘ └────────┘ │
-              └────────────────────────────┘
-```
-
----
-
-## Demo / Examples
-
-### **Fig 1. Hardware — Exterior & Design**
-
 <p align="center">
-  <img src="assets/box-exterior-side.png" width="400"><br/>
-  <i>Fig 1a: Side view with door open — mirrored interior walls visible, sensors and wiring inside</i>
+  <img src="assets/box-exterior-side.png" width="800"><br/>
+  <i>Side view with door open — mirrored interior walls visible, sensors and wiring inside</i>
 </p>
 
 <p align="center">
-  <img src="assets/box-dimensions.jpg" width="400"><br/>
-  <i>Fig 1b: Hand-drawn design sketch — box dimensions: 18×18×25 cm, base: 20×20×2.5 cm</i>
-</p>
-
-### **Fig 2. Hardware — MOSFET Noise Circuit**
-
-<p align="center">
-  <img src="assets/mosfet-circuit-closeup.jpeg" width="600"><br/>
-  <i>Fig 2: Close-up of the MOSFET noise circuit on perfboard (2kΩ pull-up + 82Ω gate resistor) mounted on the MYOSA motherboard with 0.96" OLED display</i>
-</p>
-
-### **Fig 3. Hardware — Inside the Chaotic Box**
-
-<p align="center">
-  <img src="assets/chaotic-box-inside-full.jpeg" width="600"><br/>
-  <i>Fig 3a: Inside the chaotic box — mirrored foil walls, motor shaft with spinning disc, PMS5003 particle sensor (blue, top-left), MYOSA modules (red PCBs)</i>
+  <img src="assets/box-dimensions.jpg" width="800"><br/>
+  <i>Hand-drawn design sketch — box dimensions: 18x18x25 cm, base: 20x20x2.5 cm</i>
 </p>
 
 <p align="center">
-  <img src="assets/chaotic-box-fan.jpeg" width="600"><br/>
-  <i>Fig 3b: Fan blade for particle agitation — blows air across the PMS5003 sensor to generate unpredictable particle readings</i>
+  <img src="assets/mosfet-circuit-closeup.jpeg" width="800"><br/>
+  <i>Close-up of the MOSFET noise circuit on perfboard (2k ohm pull-up + 82 ohm gate resistor) mounted on the MYOSA motherboard with 0.96" OLED display</i>
 </p>
 
 <p align="center">
-  <img src="assets/chaotic-box-sensors.jpeg" width="600"><br/>
-  <i>Fig 3c: MYOSA Light/Proximity module (APDS9960, red PCB on wall), motor shaft with LED disc, and sensor wiring harness</i>
+  <img src="assets/chaotic-box-inside-full.jpeg" width="800"><br/>
+  <i>Inside the chaotic box — mirrored foil walls, motor shaft with spinning disc, PMS5003 particle sensor (blue, top-left), MYOSA modules (red PCBs)</i>
 </p>
 
 <p align="center">
-  <img src="assets/chaotic-box-bottom.jpeg" width="600"><br/>
-  <i>Fig 3d: Bottom of chaotic box — MYOSA accelerometer/gyroscope module, BMP180 temperature sensor (blue PCB), and MOSFET perfboard with resistors</i>
+  <img src="assets/chaotic-box-fan.jpeg" width="800"><br/>
+  <i>Fan blade for particle agitation — blows air across the PMS5003 sensor to generate unpredictable particle readings</i>
 </p>
 
 <p align="center">
-  <img src="assets/chaotic-box-motor.jpeg" width="600"><br/>
-  <i>Fig 3e: Motor assembly with rotating disc and colored LEDs for visual disturbance of the APDS9960 sensor</i>
+  <img src="assets/chaotic-box-sensors.jpeg" width="800"><br/>
+  <i>MYOSA Light/Proximity module (APDS9960, red PCB on wall), motor shaft with LED disc, and sensor wiring harness</i>
 </p>
-
-### **Fig 4. Software — Dashboard**
-
-> Screenshots of the dashboard pages (login, OTP generator, raw data viewer, cryptographic dashboard) are shown during the video demo.
-
-### **Video Demo**
 
 <p align="center">
-  <video src="myosa-demo.mp4" width="600" controls></video>
+  <img src="assets/chaotic-box-bottom.jpeg" width="800"><br/>
+  <i>Bottom of chaotic box — MYOSA accelerometer/gyroscope module, BMP180 temperature sensor (blue PCB), and MOSFET perfboard with resistors</i>
 </p>
 
-[▶ Watch Demo Video](myosa-demo.mp4)
+<p align="center">
+  <img src="assets/chaotic-box-motor.jpeg" width="800"><br/>
+  <i>Motor assembly with rotating disc and colored LEDs for visual disturbance of the APDS9960 sensor</i>
+</p>
 
-> Demo video showing the full pipeline: ESP32 publishing sensor data → MQTT broker → Rust engine → blockchain MAC validation → live dashboard
+### Videos
+
+<video controls width="100%">
+  <source src="myosa-demo.mp4" type="video/mp4">
+</video>
 
 ---
 
@@ -211,24 +118,23 @@ Electronic noise in MOSFETs is naturally stochastic. Circuit Design: The Drain (
 
 ```
     +3.3V
-      │
-     [2kΩ]  ← Pull-up resistor
-      │
-      ├──────── ADC Pin 32 (MYOSA) ← Output: random noise signal
-      │
+      |
+     [2k ohm]  <- Pull-up resistor
+      |
+      +-------- ADC Pin 32 (MYOSA) <- Output: random noise signal
+      |
     Drain
-      │
-   ┌──┴──┐
-   │IRF540N│  ← N-channel MOSFET
-   └──┬──┘
+      |
+   [IRF540N]  <- N-channel MOSFET
+      |
     Gate
-      │
-     [82Ω] ← Gate resistor
-      │
-    DAC Pin 25 (MYOSA) ← Input: dacWrite(25, esp_random() & 0xFF)
-      │
+      |
+     [82 ohm] <- Gate resistor
+      |
+    DAC Pin 25 (MYOSA) <- Input: dacWrite(25, esp_random() & 0xFF)
+      |
     Source
-      │
+      |
      GND
 ```
 
@@ -268,7 +174,7 @@ To gather unpredictable digital data, a 45 cm x 45 cm box with a rough mirrored 
 
 We use Eclipse Mosquitto as the MQTT broker. The ESP32 samples all 21 sensors, packs readings into CSV, and publishes over WiFi:
 
-```
+```plaintext
 ESP32 (MYOSA sensors)
     | WiFi
     v
@@ -299,7 +205,7 @@ The blockchain is immutable. Once a MAC is registered, the record cannot be tamp
 
 One-time passwords are generated by combining a hardware random number with a microsecond timestamp:
 
-```
+```plaintext
 OTP = SHA-256(random_number_bytes || timestamp_bytes) mod 1,000,000
 ```
 
@@ -313,26 +219,20 @@ Three pages, each serving a different purpose:
 - **Raw Data Viewer** - Live sensor graphs for all 8 sensor groups, updating every 3 seconds.
 - **Cryptographic Dashboard** - Pool entropy bits, source quality tiers, health status, security event feed. Generate AES-256 keys, passwords, and session tokens on demand.
 
----
-
-## Entropy Source Quality Tiers
+### **8. Entropy Source Quality Tiers**
 
 The engine classifies each sensor source into quality tiers based on entropy contribution and health test pass rate:
 
 | Tier | Entropy Bits | Health Pass Rate | Sources |
 |------|-------------|------------------|---------|
-| **Excellent** | ≥ 7.5 bits/byte | > 99% | MOSFET noise (primary) |
-| **Good** | 5.0 – 7.5 bits/byte | > 95% | Accelerometer, Gyroscope, Particle sensor |
-| **Fair** | 2.0 – 5.0 bits/byte | > 90% | RGB color, Ambient light, Temperature |
+| **Excellent** | >= 7.5 bits/byte | > 99% | MOSFET noise (primary) |
+| **Good** | 5.0 - 7.5 bits/byte | > 95% | Accelerometer, Gyroscope, Particle sensor |
+| **Fair** | 2.0 - 5.0 bits/byte | > 90% | RGB color, Ambient light, Temperature |
 | **Poor** | < 2.0 bits/byte | < 90% | Rejected — not mixed into pool |
 
 Sources classified as **Poor** are flagged in the security event feed and excluded from the entropy pool. The dashboard displays real-time tier assignments for all active sources.
 
----
-
-## MYOSA Libraries & Modules Used
-
-This project uses the following MYOSA-provided modules and libraries:
+### **9. MYOSA Libraries & Modules Used**
 
 | MYOSA Module | Library / Interface | Purpose |
 |---|---|---|
@@ -345,17 +245,43 @@ This project uses the following MYOSA-provided modules and libraries:
 
 > **Note:** The PMS5003 and BMP180 are external sensors not included in the standard MYOSA kit. They were added to increase the number of independent entropy sources from 4 to 8 sensor groups (21 total channels).
 
----
-
-## Hardware Deviations from Original MYOSA Kit
+### **10. Hardware Deviations from Original MYOSA Kit**
 
 | Change | Reason |
 |--------|--------|
 | Added external IRF540N MOSFET circuit on breadboard | MYOSA kit does not include a dedicated analog noise source. The MOSFET's stochastic drain noise provides the primary entropy source with ~7.8 bits/byte. |
 | Added PMS5003 particle sensor via UART | Increases entropy diversity. Air particle counts are physically unpredictable and add an independent randomness channel. |
 | Added BMP180 temperature/pressure sensor | Provides environmental entropy. Temperature fluctuations inside the chaotic box contribute additional unpredictability. |
-| Built 45×45 cm chaotic box with mirrored walls | Creates a controlled but unpredictable environment — motor-driven LEDs, fan-blown particles — to maximize sensor variance. |
-| Used DAC pin 25 → Gate resistor (82Ω) → MOSFET Gate | The MYOSA DAC output drives the MOSFET gate with a random voltage (0–255), creating variable drain current and noise. |
+| Built 45x45 cm chaotic box with mirrored walls | Creates a controlled but unpredictable environment — motor-driven LEDs, fan-blown particles — to maximize sensor variance. |
+| Used DAC pin 25 -> Gate resistor (82 ohm) -> MOSFET Gate | The MYOSA DAC output drives the MOSFET gate with a random voltage (0-255), creating variable drain current and noise. |
+
+### **11. System Block Diagram**
+
+```plaintext
+CHAOTIC BOX (45x45 cm)
+  [IRF540N MOSFET Noise] --ADC--> ESP32
+  [APDS9960 RGB+Light]   --I2C--> ESP32
+  [PMS5003 Particle]     --UART-> ESP32
+  [MPU6050 + BMP180]     --I2C--> ESP32
+                                    |
+                              WiFi (MQTT, 500ms)
+                                    v
+                          Mosquitto Broker (port 1883)
+                            3 topics: random/numbers, random/params, random/MAC
+                                    |
+                                    v
+                          Rust Backend
+                            -> Blockchain Validator (MultiChain MAC check)
+                            -> SHA-256 Whitening
+                            -> Entropy Pool (256-bit) + SP 800-90B Health
+                            -> ChaCha20 DRBG (Forward Secrecy)
+                            -> Security Gate (OTP / AES Key Gen)
+                                    |
+                              HTTP API (port 3001)
+                                    v
+                          Next.js Dashboard (port 3000)
+                            [OTP Gen] [Raw Data] [Entropy Engine]
+```
 
 ---
 
@@ -540,75 +466,77 @@ This runs the firmware simulator, Rust tests (96 tests), and frontend type check
 ```
 /tu-ankaja
   ├── assets/
-  │   ├── box-exterior-front.png     # Chaotic box front view
-  │   ├── box-exterior-side.png      # Chaotic box side view (door open)
-  │   ├── mosfet-circuit-closeup.jpeg # MOSFET noise circuit on MYOSA board
+  │   ├── box-exterior-front.png
+  │   ├── box-exterior-side.png
+  │   ├── mosfet-circuit-closeup.jpeg
   │   ├── chaotic-box-inside-full.jpeg
   │   ├── chaotic-box-fan.jpeg
   │   ├── chaotic-box-sensors.jpeg
   │   ├── chaotic-box-bottom.jpeg
-  │   └── box-dimensions.jpg         # Hand-drawn design sketch
+  │   ├── chaotic-box-motor.jpeg
+  │   └── box-dimensions.jpg
   │
   ├── firmware/
   │   ├── src/
-  │   │   ├── main.c              # Firmware simulator entry point
-  │   │   ├── adc/adc.c           # ADC noise reader (xorshift simulation)
-  │   │   ├── sensors/sensors.c   # Timing jitter sensor
-  │   │   ├── entropy/entropy.c   # Avalanche mixing function
-  │   │   └── uart/uart.c         # UART hex output
-  │   ├── include/entropy_vault.h # Shared header
-  │   ├── mqtt/entropy_mqtt.ino   # ESP32 MQTT publisher (Arduino)
+  │   │   ├── main.c
+  │   │   ├── adc/adc.c
+  │   │   ├── sensors/sensors.c
+  │   │   ├── entropy/entropy.c
+  │   │   └── uart/uart.c
+  │   ├── include/entropy_vault.h
+  │   ├── mqtt/entropy_mqtt.ino
   │   └── Makefile
   │
   ├── entropy-engine/
   │   ├── src/
-  │   │   ├── main.rs             # Entry point (serial/mqtt/otp modes)
-  │   │   ├── lib.rs              # Module declarations
-  │   │   ├── api/mod.rs          # EntropyService API
-  │   │   ├── whitening/mod.rs    # SHA-256 entropy conditioning
-  │   │   ├── pool/mod.rs         # Entropy accumulation pool
-  │   │   ├── drbg/mod.rs         # ChaCha20 DRBG with forward secrecy
-  │   │   ├── health/mod.rs       # SP 800-90B health monitoring
-  │   │   ├── quality/mod.rs      # Source quality tracking
-  │   │   ├── security/mod.rs     # Security gate and policy enforcement
-  │   │   ├── crypto/mod.rs       # Password/key generation with rejection sampling
-  │   │   ├── mqtt/mod.rs         # MQTT entropy ingestor
-  │   │   ├── otp/mod.rs          # OTP generation service
-  │   │   ├── otp_mqtt/mod.rs     # OTP MQTT ingestor (3 topics)
-  │   │   ├── blockchain/mod.rs   # MultiChain MAC validation
-  │   │   ├── server/mod.rs       # HTTP API server (axum)
-  │   │   ├── parser/mod.rs       # Binary protocol parser
-  │   │   ├── serial/mod.rs       # Serial port source
-  │   │   ├── models/mod.rs       # Data models
-  │   │   └── errors/mod.rs       # Error types
-  │   ├── tests/engine.rs         # Integration tests (26 tests)
+  │   │   ├── main.rs
+  │   │   ├── lib.rs
+  │   │   ├── api/mod.rs
+  │   │   ├── whitening/mod.rs
+  │   │   ├── pool/mod.rs
+  │   │   ├── drbg/mod.rs
+  │   │   ├── health/mod.rs
+  │   │   ├── quality/mod.rs
+  │   │   ├── security/mod.rs
+  │   │   ├── crypto/mod.rs
+  │   │   ├── mqtt/mod.rs
+  │   │   ├── otp/mod.rs
+  │   │   ├── otp_mqtt/mod.rs
+  │   │   ├── blockchain/mod.rs
+  │   │   ├── server/mod.rs
+  │   │   ├── parser/mod.rs
+  │   │   ├── serial/mod.rs
+  │   │   ├── models/mod.rs
+  │   │   └── errors/mod.rs
+  │   ├── tests/engine.rs
   │   └── Cargo.toml
   │
   ├── frontend/
   │   ├── app/
-  │   │   ├── page.tsx            # Login page
-  │   │   ├── otp/page.tsx        # OTP Generator page
-  │   │   ├── data/page.tsx       # Raw Data Viewer (sensor graphs)
-  │   │   ├── entropy/page.tsx    # Cryptographic dashboard
-  │   │   └── layout.tsx          # Root layout with navbar
-  │   ├── components/             # UI components (NavBar, GeneratePanel, etc.)
-  │   ├── services/               # API service functions
-  │   ├── store/                  # Zustand state stores
-  │   ├── types/                  # TypeScript type definitions
+  │   │   ├── page.tsx
+  │   │   ├── otp/page.tsx
+  │   │   ├── data/page.tsx
+  │   │   ├── entropy/page.tsx
+  │   │   └── layout.tsx
+  │   ├── components/
+  │   ├── services/
+  │   ├── store/
+  │   ├── types/
   │   └── package.json
   │
   ├── scripts/
-  │   ├── start-wireless.sh       # Start full wireless pipeline
-  │   ├── setup_multichain.sh     # Docker MultiChain setup
-  │   ├── blockchain              # Blockchain CLI helper
-  │   ├── demo-blockchain.sh      # Blockchain video demo
-  │   ├── mqtt_simulator.py       # MQTT entropy simulator (no hardware)
-  │   ├── otp_simulator.py        # OTP MQTT simulator (3 topics)
-  │   ├── check-all.sh            # Run all local checks
-  │   ├── flash-esp32.sh          # ESP32 flashing helper
-  │   └── start_all.sh            # Start all services
+  │   ├── start-wireless.sh
+  │   ├── setup_multichain.sh
+  │   ├── blockchain
+  │   ├── demo-blockchain.sh
+  │   ├── mqtt_simulator.py
+  │   ├── otp_simulator.py
+  │   ├── check-all.sh
+  │   ├── flash-esp32.sh
+  │   └── start_all.sh
   │
-  └── LICENSE                     # MIT License
+  ├── myosa-demo.mp4
+  └── LICENSE
 ```
 
 ---
