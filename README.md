@@ -532,7 +532,7 @@ This runs the firmware simulator, Rust tests (96 tests), and frontend type check
 ## File Structure
 
 ```
-/entropy-vault
+/tu-ankaja
   ├── assets/
   │   ├── box-exterior-front.png     # Chaotic box front view
   │   ├── box-exterior-side.png      # Chaotic box side view (door open)

@@ -1,5 +1,5 @@
 {
-  "name": "entropy-vault",
+  "name": "tu-ankaja",
   "private": true,
   "scripts": {
     "check": "./scripts/check-all.sh",
