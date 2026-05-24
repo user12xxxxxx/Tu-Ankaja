@@ -11,7 +11,7 @@ tags:
   - MYOSA-kit
   - Randomness
 ---
-# Ankaja - A Hardware based Random Number Generator using MYOSA kit
+# TU Ankaja - A Hardware based Random Number Generator using MYOSA kit
 
 ![IoT](https://img.shields.io/badge/IoT-blue) ![Rust](https://img.shields.io/badge/Factory--Safety-orange) ![MOSFET](https://img.shields.io/badge/MOSFET-green) ![MQTT](https://img.shields.io/badge/MQTT-purple) ![MYOSA-kit](https://img.shields.io/badge/MYOSA-kit-red) ![Randomness](https://img.shields.io/badge/Randomness-61DAFB)
 
@@ -21,7 +21,7 @@ tags:
 
 ## Acknowledgements
 
-Built by **Team TU Ankaja** for the IEEE MYOSA Innovation Challenge, organized by the **IEEE Sensors Council**. We would like to thank the MYOSA organizers and IEEE Sensors Council for providing the MYOSA development platform and the opportunity to explore true random number generation. We also acknowledge the guidance and support provided by our mentor **Dr. Rupam Goswami**, Professor, Department of ECE, Tezpur University, throughout this project.
+Built by **Team TU Ankaja** for the IEEE MYOSA Innovation Challenge, organized by the **IEEE Sensors Council**. We would like to thank the MYOSA organizers and IEEE Sensors Council for providing the MYOSA development platform and the opportunity to explore true random number generation. We also acknowledge the guidance and support provided by our mentor **Dr. Rupam Goswami**, Assistant Professor, Department of ECE, Tezpur University, throughout this project.
 
 **Team Members:**
 
@@ -48,6 +48,7 @@ Built by **Team TU Ankaja** for the IEEE MYOSA Innovation Challenge, organized b
 * **Multi-Sensor Aggregation:** Captures physical parameters like Electronic noise using MOSFET, RGB light, ambient light, temperature, gyroscope data (in x, y, z), air particles, simultaneously.
 * **Custom Chaotic Environment:** Employs a physical mirrored box with rotating LEDs, moving discs, and agitated air particles to create a highly dynamic sensory input.
 * **Digit-Picking Algorithm:** Uses an array-based system to process sensor data into true random numbers.
+* **Validation of the RNG using NIST Suite:** The random numbers generated using the prototype were tested using the NIST Suite, and the system was found to pass __/15 tests, which is considered to be excellent.
 
 ---
 
