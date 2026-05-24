@@ -79,7 +79,7 @@ Built by **Team TU Ankaja** for the IEEE MYOSA Innovation Challenge, organized b
 
 <p align="center">
   <img src="assets/chaotic-box-inside-full.jpeg" width="800"><br/>
-  <i>Inside the chaotic box — mirrored foil walls, motor shaft with spinning disc, PMS5003 particle sensor (blue, top-left), MYOSA modules (red PCBs)</i>
+  <i>Inside the chaotic box — mirror foil, motor shaft with spinning disc, PMS5003 particle sensor (blue, top-left), MYOSA modules (red PCBs)</i>
 </p>
 
 <p align="center">
@@ -100,6 +100,16 @@ Built by **Team TU Ankaja** for the IEEE MYOSA Innovation Challenge, organized b
 <p align="center">
   <img src="assets/chaotic-box-motor.jpeg" width="800"><br/>
   <i>Motor assembly with rotating disc and colored LEDs for visual disturbance of the APDS9960 sensor</i>
+</p>
+
+<p align="center">
+  <img src="assets/dashboard-raw-data.png" width="800"><br/>
+  <i>Raw Data Viewer — live MQTT sensor graphs for MOSFET noise, color, ambient light, temperature, accelerometer, and gyroscope across 21 channels</i>
+</p>
+
+<p align="center">
+  <img src="assets/dashboard-otp.png" width="800"><br/>
+  <i>OTP Generator — hardware-backed one-time passwords generated from MOSFET noise + SHA-256, with generation history</i>
 </p>
 
 ### Videos
@@ -252,7 +262,7 @@ Sources classified as **Poor** are flagged in the security event feed and exclud
 | Added external IRF540N MOSFET circuit on breadboard | MYOSA kit does not include a dedicated analog noise source. The MOSFET's stochastic drain noise provides the primary entropy source with ~7.8 bits/byte. |
 | Added PMS5003 particle sensor via UART | Increases entropy diversity. Air particle counts are physically unpredictable and add an independent randomness channel. |
 | Added BMP180 temperature/pressure sensor | Provides environmental entropy. Temperature fluctuations inside the chaotic box contribute additional unpredictability. |
-| Built 45x45 cm chaotic box with mirrored walls | Creates a controlled but unpredictable environment — motor-driven LEDs, fan-blown particles — to maximize sensor variance. |
+| Built 45x45 cm chaotic box with mirror foil | Creates a controlled but unpredictable environment — motor-driven LEDs, fan-blown particles — to maximize sensor variance. |
 | Used DAC pin 25 -> Gate resistor (82 ohm) -> MOSFET Gate | The MYOSA DAC output drives the MOSFET gate with a random voltage (0-255), creating variable drain current and noise. |
 
 ### **11. System Block Diagram**
