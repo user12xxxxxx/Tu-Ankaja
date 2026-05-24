@@ -299,6 +299,7 @@ This compiles and runs the C entropy simulator locally, printing a sample of gen
 * **Framer Motion** - Animation library for smooth UI transitions
 * **Zustand** - Lightweight state management for React
 * **Tailwind CSS v4** - Utility-first CSS framework
+
 ---
 
 ## Requirements / Installation
