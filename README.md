@@ -1,5 +1,5 @@
 ---
-publishDate: 2026-05-24T00:00:00Z
+publishDate: 2026-05-14T00:00:00Z
 title: Entropy Vault - Hardware Random Number Generator with Blockchain Device Authentication
 excerpt: A multi-sensor hardware entropy collector built on ESP32 and MYOSA, feeding a cryptographic engine over MQTT with blockchain-based device authentication and a real-time dashboard.
 image: entropy-vault/cover.jpg
@@ -14,13 +14,17 @@ tags:
   - iot-security
 ---
 
+# Entropy Vault - A Hardware based True Random Number Generator using MYOSA Kit
+
+![IoT](https://img.shields.io/badge/IoT-blue) ![Rust](https://img.shields.io/badge/Rust-orange) ![MOSFET](https://img.shields.io/badge/MOSFET-green) ![MQTT](https://img.shields.io/badge/MQTT-purple) ![MYOSA-kit](https://img.shields.io/badge/MYOSA--kit-red) ![Blockchain](https://img.shields.io/badge/Blockchain-yellow) ![Randomness](https://img.shields.io/badge/Randomness-61DAFB)
+
 > Turn raw sensor noise into cryptographically secure random numbers, verified by blockchain and visualized in real time.
 
 ---
 
 ## Acknowledgements
 
-Built by **Team TU Ankaja** for the IEEE MYOSA program. Special thanks to the MYOSA team for the multi-sensor board that made this project possible, and to our mentors for guidance on cryptographic engineering and embedded systems.
+Built by **Team TU Ankaja** for the IEEE MYOSA Innovation Challenge. We would like to thank the MYOSA organizers for providing the MYOSA development platform and the opportunity to explore true random number generation. We also acknowledge the guidance and support provided by our mentor **Dr. Rupam Goswami Sir** throughout this project.
 
 ---
 
@@ -89,22 +93,31 @@ The critical security question: how do you know the data actually came from your
 
 ## Features (Detailed)
 
-### **1. Multi-Sensor Entropy Collection (ESP32 + MYOSA)**
+### **1. Analog Noise Generator Circuit (MOSFET)**
+
+Electronic noise in MOSFETs is naturally stochastic, making it an ideal source of true randomness. The circuit uses an IRF540N n-channel MOSFET as the primary noise source:
+
+- **Circuit Design**: The Drain (D) terminal is connected to +3.3V using a 2k ohm pull-up resistor. A random value from 0 to 255 is applied at the Gate (G) from DAC pin 25 of the MYOSA Motherboard through a small 82 ohm gate resistor using `dacWrite(25, esp_random() & 0xFF)`.
+- **Output**: The resulting random signal is harvested from the Drain terminal and fed directly to the 12-bit ADC pin 32 of the MYOSA motherboard.
+
+This analog noise is the primary entropy source because electronic noise is physically unpredictable and cannot be reproduced.
+
+### **2. Multi-Sensor Entropy Collection (ESP32 + MYOSA)**
 
 The MYOSA board gives us 21 sensor channels, and we use all of them. The ESP32 reads:
 
-- **MOSFET Noise** - Analog electronic noise from the MOSFET circuit. This is the primary entropy source because electronic noise is physically unpredictable.
+- **MOSFET Noise** - Analog electronic noise from the MOSFET circuit (primary entropy source).
 - **Temperature** - Environmental temperature fluctuations add low-frequency entropy.
 - **Accelerometer (3-axis)** - Micro-vibrations in X, Y, Z axes. Even a board sitting on a table picks up building vibrations, air conditioning hum, etc.
 - **Gyroscope (3-axis)** - Rotational jitter. The sensor noise floor itself contributes randomness.
-- **Color Sensor (RGB)** - Raw red, green, blue light readings. Ambient light variation adds environmental entropy.
+- **Color Sensor (RGB)** - Raw red, green, blue light readings via the APDS9960 sensor. Ambient light variation adds environmental entropy.
 - **Ambient Light** - Lux measurement that changes with any shadow, cloud, or movement nearby.
-- **Particle Sensor (PM1.0, PM2.5, PM10)** - Air quality mass concentrations. These fluctuate constantly in any real environment.
+- **Particle Sensor (PM1.0, PM2.5, PM10)** - Air quality mass concentrations from the PMS5003 sensor. These fluctuate constantly in any real environment.
 - **Particle Counts (6 size bins)** - Count of particles above 0.3, 0.5, 1.0, 2.5, 5.0, and 10 micrometers. High-frequency variation.
 
 The ESP32 samples all sensors, packs the readings into CSV, and publishes over MQTT to the `random/params` topic. Simultaneously, 4-digit random numbers derived from MOSFET noise are published to `random/numbers`. The device MAC address is sent as JSON to `random/MAC` for blockchain authentication.
 
-### **2. Wireless Data Pipeline (MQTT)**
+### **3. Wireless Data Pipeline (MQTT)**
 
 We use Eclipse Mosquitto as the MQTT broker. The architecture:
 
@@ -123,7 +136,7 @@ Next.js Dashboard (port 3000)
 
 MQTT gives us reliable, low-latency message delivery. The broker requires username/password authentication, so unauthorized devices cannot connect. QoS level 1 (at least once delivery) ensures no entropy samples are silently dropped.
 
-### **3. Blockchain Device Authentication (MultiChain)**
+### **4. Blockchain Device Authentication (MultiChain)**
 
 This is the core security feature. Anyone who knows the MQTT credentials could connect a fake device and publish garbage data. MAC address spoofing is trivial. So we put the trust anchor on a blockchain.
 
@@ -137,7 +150,7 @@ How it works:
 
 The blockchain is immutable. Once a MAC is registered, the record cannot be tampered with. A Docker setup script (`scripts/setup_multichain.sh`) handles the entire MultiChain installation, chain creation, stream setup, and test MAC seeding in one command.
 
-### **4. Cryptographic Entropy Engine (Rust)**
+### **5. Cryptographic Entropy Engine (Rust)**
 
 The entropy engine is written in Rust and implements a proper cryptographic pipeline:
 
@@ -150,7 +163,7 @@ The entropy engine is written in Rust and implements a proper cryptographic pipe
 
 All sensitive state is zeroized on drop using the `zeroize` crate.
 
-### **5. OTP Generation**
+### **6. OTP Generation**
 
 One-time passwords are generated by combining a hardware random number with a microsecond timestamp:
 
@@ -160,7 +173,7 @@ OTP = SHA-256(random_number_bytes || timestamp_bytes) mod 1,000,000
 
 This produces a 6-digit code. The random number comes from MOSFET noise (not pseudo-random), and the timestamp adds uniqueness even if the same number is selected twice. OTP history is maintained for auditing.
 
-### **6. Real-Time Dashboard (Next.js)**
+### **7. Real-Time Dashboard (Next.js)**
 
 Three pages, each serving a different purpose:
 
@@ -269,8 +282,11 @@ This compiles and runs the C entropy simulator locally, printing a sample of gen
 
 ## Tech Stack
 
-* **ESP32** - Microcontroller with built-in WiFi for wireless sensor data transmission
+* **ESP32 (MYOSA Motherboard)** - Microcontroller with built-in WiFi for wireless sensor data transmission
 * **MYOSA Sensor Board** - 21-channel multi-sensor board (MOSFET noise, IMU, color, light, particle sensor)
+* **IRF540N MOSFET** - N-channel MOSFET for analog noise generation (primary entropy source)
+* **APDS9960** - RGB and ambient light sensor module
+* **PMS5003** - Particle matter sensor for air quality readings
 * **C** - Firmware for ADC noise reading and entropy mixing with avalanche function
 * **Arduino (PubSubClient)** - MQTT client library for ESP32 WiFi publishing
 * **Rust** - Entropy engine with SHA-256 whitening, ChaCha20 DRBG, health monitoring, and HTTP API
@@ -287,7 +303,18 @@ This compiles and runs the C entropy simulator locally, printing a sample of gen
 
 ## Requirements / Installation
 
-### System Requirements
+### Hardware Requirements
+
+- MYOSA Motherboard (ESP32-based)
+- MYOSA OLED Display
+- MYOSA Accelerometer/Gyroscope Module
+- MYOSA Light/Proximity Module (APDS9960)
+- Particle Sensor (PMS5003)
+- IRF540N n-channel MOSFET
+- 2k ohm pull-up resistor, 82 ohm gate resistor
+- Breadboard and jumper wires
+
+### Software Requirements
 
 - Rust toolchain (1.70+)
 - Node.js (18+)
