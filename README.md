@@ -22,6 +22,15 @@ tags:
 
 ---
 
+## Team Members
+
+| Name | Role |
+|------|------|
+| Yash Sharma | Lead Developer — Rust entropy engine, MQTT pipeline, blockchain integration, frontend dashboard |
+| Nautesh Kanojiya | Hardware Design — MOSFET noise circuit, chaotic box construction, sensor wiring |
+| Nabjyoti | Firmware — ESP32 MQTT publisher, sensor data collection, BCD clamping logic |
+| Hritmia | Testing & Documentation — Integration tests, README, demo scripts |
+
 ## Acknowledgements
 
 Built by **Team TU Ankaja** for the IEEE MYOSA Innovation Challenge. We would like to thank the MYOSA organizers for providing the MYOSA development platform and the opportunity to explore true random number generation. We also acknowledge the guidance and support provided by our mentor **Dr. Rupam Goswami Sir** throughout this project.
@@ -30,22 +39,21 @@ Built by **Team TU Ankaja** for the IEEE MYOSA Innovation Challenge. We would li
 
 ## Overview
 
-Most random number generators on computers are pseudo-random. They use algorithms that look random but are actually deterministic. For anything security-critical like encryption keys, passwords, or one-time passwords, you need true randomness sourced from physical phenomena.
+**TU Ankaja** is an innovative hardware-software system designed to generate true random numbers by combining natural stochastic electronic noise with unpredictable physical parameters.
 
-Entropy Vault solves this by turning the MYOSA sensor board into a dedicated hardware entropy source. It reads analog noise from a MOSFET circuit, combines it with accelerometer jitter, gyroscope drift, temperature fluctuations, ambient light changes, and particle sensor readings. All 21 sensor channels contribute unpredictability. This raw data is sent wirelessly over MQTT to a Rust-based cryptographic engine that conditions, validates, and serves the entropy through an HTTP API. A Next.js dashboard lets you watch everything happen live.
+**What problem does it solve?**
+- Overcomes the predictability of purely algorithmic pseudo-random number generators.
+- Provides a **low analog computational cost** solution for capturing random electronic fluctuations.
+- Serves as a customized hardware source for true randomness, perfectly **tailored for low-to-moderate priority security applications.**
 
-The critical security question: how do you know the data actually came from your hardware and not from a spoofed device? We solve this with a two-layer approach. First, MQTT broker authentication requires credentials. Second, the ESP32 publishes its MAC address on a dedicated MQTT topic, and the backend validates it against a MultiChain blockchain. If the MAC is not registered on-chain, every single random number from that device gets rejected.
-
-**What it does in practice:**
-
-* Collects entropy from 21 physical sensors simultaneously
-* Streams data wirelessly to the backend at 500ms intervals via MQTT
-* Conditions raw noise through SHA-256 whitening into uniform random bytes
-* Feeds a ChaCha20-based DRBG with forward secrecy for cryptographic output
-* Runs SP 800-90B health monitoring on every sample (repetition count, adaptive proportion)
-* Validates the source device against a blockchain before accepting any data
-* Generates AES-256 keys, passwords, session tokens, and hardware-backed OTPs
-* Shows all of this on a live dashboard with per-sensor graphs updating every 3 seconds
+**Key Features:**
+* **Analog Noise Generation:** Utilizes an IRF540N n-channel MOSFET as a switch to generate high-frequency noise signals.
+* **Multi-Sensor Aggregation:** Captures physical parameters like electronic noise using MOSFET, RGB light, ambient light, temperature, gyroscope data (in x, y, z), air particles simultaneously.
+* **Wireless Data Pipeline:** Streams all 21 sensor channels over MQTT to a Rust-based cryptographic engine at 500ms intervals.
+* **Blockchain Device Authentication:** Validates the ESP32 MAC address against a MultiChain blockchain before accepting any data.
+* **Cryptographic Engine:** SHA-256 whitening, ChaCha20 DRBG with forward secrecy, SP 800-90B health monitoring.
+* **OTP Generation:** Generates hardware-backed 6-digit one-time passwords from MOSFET noise + SHA-256.
+* **Real-Time Dashboard:** Live sensor graphs, entropy pool stats, and cryptographic material generation on a Next.js frontend.
 
 ---
 
@@ -93,33 +101,51 @@ The critical security question: how do you know the data actually came from your
 
 ## Features (Detailed)
 
-### **1. Analog Noise Generator Circuit (MOSFET)**
+### **1. Analog Noise Generator Circuit**
 
-Electronic noise in MOSFETs is naturally stochastic, making it an ideal source of true randomness. The circuit uses an IRF540N n-channel MOSFET as the primary noise source:
+Electronic noise in MOSFETs is naturally stochastic. Circuit Design: The Drain (D) terminal is connected to +3.3V using a 2k ohm pull-up resistor. Input: A random value from 0 to 255 using `dacWrite(25, esp_random() & 0xFF)` function is applied at the Gate (G) from the DAC pin 25 of MYOSA Motherboard through a small gate resistor 82 ohm. Output: The resulting random signal is harvested from the Drain terminal and fed directly to the 12-bit ADC pin 32 of the MYOSA motherboard.
 
-- **Circuit Design**: The Drain (D) terminal is connected to +3.3V using a 2k ohm pull-up resistor. A random value from 0 to 255 is applied at the Gate (G) from DAC pin 25 of the MYOSA Motherboard through a small 82 ohm gate resistor using `dacWrite(25, esp_random() & 0xFF)`.
-- **Output**: The resulting random signal is harvested from the Drain terminal and fed directly to the 12-bit ADC pin 32 of the MYOSA motherboard.
+```
+    +3.3V
+      │
+     [2kΩ]  ← Pull-up resistor
+      │
+      ├──────── ADC Pin 32 (MYOSA) ← Output: random noise signal
+      │
+    Drain
+      │
+   ┌──┴──┐
+   │IRF540N│  ← N-channel MOSFET
+   └──┬──┘
+    Gate
+      │
+     [82Ω] ← Gate resistor
+      │
+    DAC Pin 25 (MYOSA) ← Input: dacWrite(25, esp_random() & 0xFF)
+      │
+    Source
+      │
+     GND
+```
 
-This analog noise is the primary entropy source because electronic noise is physically unpredictable and cannot be reproduced.
+### **2. Chaotic Hardware Environment**
 
-### **2. Multi-Sensor Entropy Collection (ESP32 + MYOSA)**
+To gather unpredictable digital data, a 45 cm x 45 cm box with a rough mirrored inner wall houses multiple stimuli:
 
-The MYOSA board gives us 21 sensor channels, and we use all of them. The ESP32 reads:
+- **Visual Disturbance:** A motor rotates colored LEDs and sweeps a disc around the APDS9960 sensor to trigger random RGB and gesture data.
+- **Particle Agitation:** A PC fan continuously blows air inside the box, scattering particles for the PMS5003 sensor to detect.
+- **Environmental Metrics:** External BMP180 and CCS811 sensors gather ambient temperature, pressure, humidity, and volatile organic compounds to add extra environmental entropy.
 
-- **MOSFET Noise** - Analog electronic noise from the MOSFET circuit (primary entropy source).
-- **Temperature** - Environmental temperature fluctuations add low-frequency entropy.
-- **Accelerometer (3-axis)** - Micro-vibrations in X, Y, Z axes. Even a board sitting on a table picks up building vibrations, air conditioning hum, etc.
-- **Gyroscope (3-axis)** - Rotational jitter. The sensor noise floor itself contributes randomness.
-- **Color Sensor (RGB)** - Raw red, green, blue light readings via the APDS9960 sensor. Ambient light variation adds environmental entropy.
-- **Ambient Light** - Lux measurement that changes with any shadow, cloud, or movement nearby.
-- **Particle Sensor (PM1.0, PM2.5, PM10)** - Air quality mass concentrations from the PMS5003 sensor. These fluctuate constantly in any real environment.
-- **Particle Counts (6 size bins)** - Count of particles above 0.3, 0.5, 1.0, 2.5, 5.0, and 10 micrometers. High-frequency variation.
+### **3. Digital Processing & BCD Clamping**
 
-The ESP32 samples all sensors, packs the readings into CSV, and publishes over MQTT to the `random/params` topic. Simultaneously, 4-digit random numbers derived from MOSFET noise are published to `random/numbers`. The device MAC address is sent as JSON to `random/MAC` for blockchain authentication.
+- **Data Collection:** Sensors communicate via I2C and UART (PMS5003), sending 8-bit digital data packets.
+- **Array Initialization:** The system accumulates two sets of 8-bit data into a 16-bit variable for each sensor.
+- **Random Bit Selection:** A software "BitPicker" randomly selects bits from across the sensor arrays.
+- **BCD Clamping:** The 16 random bits are grouped, and a modulo operator (%10) limits the decimal equivalent of the chunks to 9 (preventing hex values up to 15), finalizing the 16-bit random output.
 
-### **3. Wireless Data Pipeline (MQTT)**
+### **4. Wireless Data Pipeline (MQTT)**
 
-We use Eclipse Mosquitto as the MQTT broker. The architecture:
+We use Eclipse Mosquitto as the MQTT broker. The ESP32 samples all 21 sensors, packs readings into CSV, and publishes over WiFi:
 
 ```
 ESP32 (MYOSA sensors)
@@ -134,13 +160,11 @@ Rust Entropy Engine (subscriber)
 Next.js Dashboard (port 3000)
 ```
 
-MQTT gives us reliable, low-latency message delivery. The broker requires username/password authentication, so unauthorized devices cannot connect. QoS level 1 (at least once delivery) ensures no entropy samples are silently dropped.
+MQTT gives us reliable, low-latency message delivery. The broker requires username/password authentication, so unauthorized devices cannot connect. QoS level 1 ensures no entropy samples are silently dropped.
 
-### **4. Blockchain Device Authentication (MultiChain)**
+### **5. Blockchain Device Authentication (MultiChain)**
 
-This is the core security feature. Anyone who knows the MQTT credentials could connect a fake device and publish garbage data. MAC address spoofing is trivial. So we put the trust anchor on a blockchain.
-
-How it works:
+This is the core security feature. Anyone who knows the MQTT credentials could connect a fake device and publish garbage data. So we put the trust anchor on a blockchain.
 
 1. An administrator registers valid device MAC addresses on a MultiChain blockchain stream called `valid-macs`
 2. When an ESP32 connects and publishes to `random/MAC` with `{"mac":"4C:C3:82:36:81:04"}`, the backend receives it
@@ -148,22 +172,19 @@ How it works:
 4. If the MAC is found: the device is trusted, all random numbers are accepted
 5. If the MAC is NOT found: every single random number from that device is rejected and discarded
 
-The blockchain is immutable. Once a MAC is registered, the record cannot be tampered with. A Docker setup script (`scripts/setup_multichain.sh`) handles the entire MultiChain installation, chain creation, stream setup, and test MAC seeding in one command.
+The blockchain is immutable. Once a MAC is registered, the record cannot be tampered with.
 
-### **5. Cryptographic Entropy Engine (Rust)**
+### **6. Cryptographic Entropy Engine (Rust)**
 
 The entropy engine is written in Rust and implements a proper cryptographic pipeline:
 
-- **SHA-256 Whitening** - Raw sensor data is biased (ADC readings cluster, temperature changes slowly). The whitener conditions input through SHA-256 to produce uniformly distributed bytes. Biased input in, uniform output out.
-- **Entropy Pool** - A 256-bit SHA-256 accumulation pool. New data is mixed in via `SHA-256(state || input)`. This guarantees entropy only accumulates. Mixing in low-quality data cannot reduce what is already there.
-- **Source Quality Tracking** - Each entropy source gets a quality score (min-entropy per byte, confidence, correlation analysis). High-quality sources contribute more to the pool's weighted entropy estimate.
-- **SP 800-90B Health Monitoring** - Three continuous health tests run on every sample: repetition count test (catches stuck sensors), adaptive proportion test (catches biased distributions), and entropy degradation check (catches low diversity). A failed health check blocks all output.
-- **ChaCha20 DRBG** - A deterministic random bit generator seeded from the entropy pool. Uses ChaCha20 stream cipher for output. After each generation, the key is ratcheted forward so past outputs cannot be recovered even if current state is compromised (forward secrecy). Mandatory reseed after 1 MiB of output.
-- **Security Gate** - A policy enforcement layer between the pipeline and output. Production policy requires 256 bits of weighted pool entropy for AES keys, blocks simulated sources, and refuses output during health warnings. Development policy is permissive for testing.
+- **SHA-256 Whitening** - Conditions biased sensor data into uniformly distributed bytes.
+- **Entropy Pool** - A 256-bit SHA-256 accumulation pool. New data is mixed in via `SHA-256(state || input)`.
+- **SP 800-90B Health Monitoring** - Repetition count test, adaptive proportion test, and entropy degradation check run on every sample.
+- **ChaCha20 DRBG** - Deterministic random bit generator with forward secrecy. Key is ratcheted after each generation.
+- **Security Gate** - Policy enforcement layer. Production policy requires 256 bits of pool entropy for AES keys.
 
-All sensitive state is zeroized on drop using the `zeroize` crate.
-
-### **6. OTP Generation**
+### **7. OTP Generation**
 
 One-time passwords are generated by combining a hardware random number with a microsecond timestamp:
 
@@ -171,17 +192,59 @@ One-time passwords are generated by combining a hardware random number with a mi
 OTP = SHA-256(random_number_bytes || timestamp_bytes) mod 1,000,000
 ```
 
-This produces a 6-digit code. The random number comes from MOSFET noise (not pseudo-random), and the timestamp adds uniqueness even if the same number is selected twice. OTP history is maintained for auditing.
+This produces a 6-digit code. The random number comes from MOSFET noise (not pseudo-random), and the timestamp adds uniqueness even if the same number appears twice.
 
-### **7. Real-Time Dashboard (Next.js)**
+### **8. Real-Time Dashboard (Next.js)**
 
 Three pages, each serving a different purpose:
 
-- **OTP Generator** - Generate hardware-backed OTPs with one click. Shows source number, timestamp, and history of past codes.
-- **Raw Data Viewer** - Live sensor graphs for all 8 sensor groups, updating every 3 seconds. Particle concentration charts are shown first since they have the most dynamic readings. Raw CSV data and random numbers are displayed below.
-- **Entropy Engine** - Full pipeline visibility. Pool entropy bits, source quality tiers, health status, security event feed. Generate AES-256 keys, passwords, and session tokens on demand.
+- **OTP Generator** - Generate hardware-backed OTPs with one click. Shows source number, timestamp, and history.
+- **Raw Data Viewer** - Live sensor graphs for all 8 sensor groups, updating every 3 seconds.
+- **Entropy Engine** - Pool entropy bits, source quality tiers, health status, security event feed. Generate AES-256 keys, passwords, and session tokens on demand.
 
-Built with React 19, Recharts for graphing, Framer Motion for animations, Zustand for state management, and Tailwind CSS for styling.
+---
+
+## Entropy Source Quality Tiers
+
+The engine classifies each sensor source into quality tiers based on entropy contribution and health test pass rate:
+
+| Tier | Entropy Bits | Health Pass Rate | Sources |
+|------|-------------|------------------|---------|
+| **Excellent** | ≥ 7.5 bits/byte | > 99% | MOSFET noise (primary) |
+| **Good** | 5.0 – 7.5 bits/byte | > 95% | Accelerometer, Gyroscope, Particle sensor |
+| **Fair** | 2.0 – 5.0 bits/byte | > 90% | RGB color, Ambient light, Temperature |
+| **Poor** | < 2.0 bits/byte | < 90% | Rejected — not mixed into pool |
+
+Sources classified as **Poor** are flagged in the security event feed and excluded from the entropy pool. The dashboard displays real-time tier assignments for all active sources.
+
+---
+
+## MYOSA Libraries & Modules Used
+
+This project uses the following MYOSA-provided modules and libraries:
+
+| MYOSA Module | Library / Interface | Purpose |
+|---|---|---|
+| MYOSA Motherboard (ESP32) | `WiFi.h`, `PubSubClient.h`, DAC (`dacWrite`), ADC (`analogRead`) | WiFi connectivity, MQTT publishing, MOSFET gate drive, noise sampling |
+| MYOSA Accelerometer/Gyroscope | `Wire.h` (I2C, address `0x68`) | 6-axis motion data (accel x/y/z, gyro x/y/z) for entropy mixing |
+| MYOSA Light/Proximity (APDS9960) | `SparkFun_APDS9960.h` (I2C) | RGB color values and ambient light intensity |
+| MYOSA OLED Display | `Adafruit_SSD1306.h` (I2C) | On-device status display |
+| PMS5003 Particle Sensor | UART (`Serial2`) | PM1.0, PM2.5, PM10 particle concentration readings |
+| BMP180 | `Adafruit_BMP085.h` (I2C) | Temperature and barometric pressure |
+
+> **Note:** The PMS5003 and BMP180 are external sensors not included in the standard MYOSA kit. They were added to increase the number of independent entropy sources from 4 to 8 sensor groups (21 total channels).
+
+---
+
+## Hardware Deviations from Original MYOSA Kit
+
+| Change | Reason |
+|--------|--------|
+| Added external IRF540N MOSFET circuit on breadboard | MYOSA kit does not include a dedicated analog noise source. The MOSFET's stochastic drain noise provides the primary entropy source with ~7.8 bits/byte. |
+| Added PMS5003 particle sensor via UART | Increases entropy diversity. Air particle counts are physically unpredictable and add an independent randomness channel. |
+| Added BMP180 temperature/pressure sensor | Provides environmental entropy. Temperature fluctuations inside the chaotic box contribute additional unpredictability. |
+| Built 45×45 cm chaotic box with mirrored walls | Creates a controlled but unpredictable environment — motor-driven LEDs, fan-blown particles — to maximize sensor variance. |
+| Used DAC pin 25 → Gate resistor (82Ω) → MOSFET Gate | The MYOSA DAC output drives the MOSFET gate with a random voltage (0–255), creating variable drain current and noise. |
 
 ---
 
